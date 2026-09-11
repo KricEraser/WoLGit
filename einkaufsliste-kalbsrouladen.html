@@ -283,11 +283,15 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     ['gratin','Das Kartoffelgratin','Kommt parallel in den Ofen']
   ];
 
-  var MIN = 2, MAX = 10;
+  var MIN = 2, MAX = 10, LS = 'kalbsrouladen-einkauf-v1';
   var nf = new Intl.NumberFormat('de-DE', {maximumFractionDigits:2});
+
+  // state.checked ist IMMER ein eigenes, beschreibbares Objekt. Snapshots aus
+  // der Datenbank kommen eingefroren zurueck, deshalb wird alles von dort
+  // kopiert, bevor es in den Zustand wandert.
   var state = {servings:4, checked:{}};
   var view = 'route';
-  var LS = 'kalbsrouladen-einkauf-v1';
+  var lastEdit = 0;
 
   var elList = document.getElementById('list');
   var elCount = document.getElementById('count');
@@ -300,7 +304,15 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
   var elSync = document.getElementById('sync');
   var elSyncText = document.getElementById('sync-text');
 
-  /* ---- Mengen ---- */
+  function copyChecked(src){
+    var out = {};
+    if (src && typeof src === 'object'){
+      for (var k in src){ if (Object.prototype.hasOwnProperty.call(src, k) && src[k]) out[k] = true; }
+    }
+    return out;
+  }
+  function clamp(n){ n = Math.round(n) || 4; return Math.min(MAX, Math.max(MIN, n)); }
+
   function qty(it, n){
     if (it.fixed) return it.fixed;
     var v = it.per * n;
@@ -311,31 +323,40 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     return nf.format(v) + ' ' + it.unit;
   }
 
-  /* ---- Speichern ---- */
+  /* ---------- Speichern ---------- */
   function saveLocal(){
-    try { localStorage.setItem(LS, JSON.stringify({servings:state.servings, checked:state.checked, view:view})); } catch(e){}
+    try { localStorage.setItem(LS, JSON.stringify({servings:state.servings, checked:state.checked, view:view, rev:lastEdit})); } catch(e){}
   }
   function loadLocal(){
     try {
       var raw = localStorage.getItem(LS); if (!raw) return;
       var d = JSON.parse(raw); if (!d || typeof d !== 'object') return;
       if (typeof d.servings === 'number') state.servings = clamp(d.servings);
-      if (d.checked && typeof d.checked === 'object') state.checked = d.checked;
+      state.checked = copyChecked(d.checked);
+      if (typeof d.rev === 'number') lastEdit = d.rev;
       if (d.view === 'dish' || d.view === 'route') view = d.view;
     } catch(e){}
   }
-  function clamp(n){ n = Math.round(n) || 4; return Math.min(MAX, Math.max(MIN, n)); }
 
-  var doc = null, pushTimer = null;
+  var doc = null, pushTimer = null, inflight = 0;
+
+  function syncLabel(on, text){
+    elSync.className = on ? 'sync live' : 'sync';
+    elSyncText.textContent = text;
+  }
+
   function push(){
     saveLocal();
     if (!doc) return;
     if (pushTimer) clearTimeout(pushTimer);
     pushTimer = setTimeout(function(){
-      pushTimer = null;
-      doc.set({servings:state.servings, checked:state.checked, updatedAt:new Date().toISOString()})
-         .catch(function(){});
-    }, 400);
+      pushTimer = null; inflight++;
+      doc.set({servings:state.servings, checked:state.checked, rev:lastEdit, updatedAt:new Date().toISOString()})
+        .then(function(){ inflight--; }, function(){
+          inflight--; doc = null;
+          syncLabel(false, 'Nur auf diesem Gerät gespeichert');
+        });
+    }, 350);
   }
 
   try {
@@ -343,35 +364,63 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
       window.claude.use('db').then(function(db){
         if (!db) return;
         doc = db.doc('einkauf/kalbsrouladen');
-        elSync.className = 'sync live';
-        elSyncText.textContent = 'Wird geräteübergreifend gespeichert';
+        syncLabel(true, 'Wird geräteübergreifend gespeichert');
         doc.onSnapshot(function(snap){
-          if (pushTimer) return;                 // eigene Änderung ist noch unterwegs
-          if (!snap.exists){ push(); return; }   // erstes Mal: lokalen Stand hochschieben
+          if (!snap.exists){ push(); return; }                       // erstmalig anlegen
+          if (snap.metadata && snap.metadata.hasPendingWrites) return; // eigener Schreibvorgang
+          if (pushTimer || inflight) return;                          // lokale Änderung unterwegs
           var d = snap.data() || {};
+          if (typeof d.rev === 'number' && d.rev < lastEdit) return;   // veralteter Stand
           if (typeof d.servings === 'number') state.servings = clamp(d.servings);
-          state.checked = (d.checked && typeof d.checked === 'object') ? d.checked : {};
+          state.checked = copyChecked(d.checked);
+          if (typeof d.rev === 'number') lastEdit = d.rev;
           saveLocal();
           render();
         }, function(){
           doc = null;
-          elSync.className = 'sync';
-          elSyncText.textContent = 'Nur auf diesem Gerät gespeichert';
+          syncLabel(false, 'Nur auf diesem Gerät gespeichert');
         });
       }).catch(function(){});
     }
   } catch(e){}
 
-  /* ---- Zeichnen ---- */
+  /* ---------- Zeichnen ---------- */
+  var tallies = [];   // {el, items} je Gruppe, fuer Aktualisierung ohne Neuaufbau
+
   function groups(){
-    if (view === 'dish'){
-      return DISHES.map(function(g){
-        return {label:g[1], hint:g[2], items:ITEMS.filter(function(i){ return i.dish === g[0]; })};
-      });
-    }
-    return AISLES.map(function(g){
-      return {label:g[1], hint:g[2], items:ITEMS.filter(function(i){ return i.aisle === g[0]; })};
+    var src = view === 'dish' ? DISHES : AISLES;
+    var key = view === 'dish' ? 'dish' : 'aisle';
+    return src.map(function(g){
+      return {label:g[1], hint:g[2], items:ITEMS.filter(function(i){ return i[key] === g[0]; })};
     });
+  }
+
+  function updateCounts(){
+    tallies.forEach(function(t){
+      var done = t.items.filter(function(i){ return state.checked[i.id]; }).length;
+      t.el.textContent = done + '/' + t.items.length;
+    });
+    var total = ITEMS.length;
+    var got = ITEMS.filter(function(i){ return state.checked[i.id]; }).length;
+    elCount.textContent = '';
+    elCount.appendChild(document.createTextNode(String(got)));
+    var small = document.createElement('small'); small.textContent = '/' + total;
+    elCount.appendChild(small);
+    elRail.style.width = Math.round(got / total * 100) + '%';
+    document.body.classList.toggle('done', got === total);
+    elStatus.textContent = got === 0 ? 'Noch nichts im Wagen'
+      : got === total ? 'Alles beisammen — ab in die Küche'
+      : 'Noch ' + (total - got) + (total - got === 1 ? ' Position' : ' Positionen');
+  }
+
+  function toggle(it, label, on){
+    var next = copyChecked(state.checked);      // niemals in place aendern
+    if (on) next[it.id] = true; else delete next[it.id];
+    state.checked = next;
+    lastEdit = Date.now();
+    label.classList.toggle('on', !!on);
+    updateCounts();
+    push();
   }
 
   function render(){
@@ -383,6 +432,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     document.getElementById('v-dish').setAttribute('aria-pressed', String(view === 'dish'));
 
     elList.textContent = '';
+    tallies = [];
+
     groups().forEach(function(g){
       var sec = document.createElement('section');
       sec.className = 'group';
@@ -391,10 +442,10 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
       head.className = 'group-head';
       var h2 = document.createElement('h2'); h2.textContent = g.label;
       var tally = document.createElement('span'); tally.className = 'tally';
-      var done = g.items.filter(function(i){ return state.checked[i.id]; }).length;
-      tally.textContent = done + '/' + g.items.length;
       head.appendChild(h2); head.appendChild(tally);
       sec.appendChild(head);
+      tallies.push({el:tally, items:g.items});
+
       if (g.hint){
         var hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = g.hint;
         sec.appendChild(hint);
@@ -410,10 +461,7 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
         input.type = 'checkbox';
         input.id = 'chk-' + it.id;
         input.checked = !!state.checked[it.id];
-        input.addEventListener('change', function(){
-          if (input.checked) state.checked[it.id] = true; else delete state.checked[it.id];
-          push(); render();
-        });
+        input.addEventListener('change', function(){ toggle(it, label, input.checked); });
 
         var box = document.createElement('span'); box.className = 'box'; box.setAttribute('aria-hidden','true');
 
@@ -437,22 +485,17 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
       elList.appendChild(sec);
     });
 
-    var total = ITEMS.length;
-    var got = ITEMS.filter(function(i){ return state.checked[i.id]; }).length;
-    elCount.textContent = '';
-    elCount.appendChild(document.createTextNode(String(got)));
-    var small = document.createElement('small'); small.textContent = '/' + total;
-    elCount.appendChild(small);
-    elRail.style.width = Math.round(got / total * 100) + '%';
-    document.body.classList.toggle('done', got === total);
-    elStatus.textContent = got === 0 ? 'Noch nichts im Wagen'
-      : got === total ? 'Alles beisammen — ab in die Küche'
-      : 'Noch ' + (total - got) + (total - got === 1 ? ' Position' : ' Positionen');
+    updateCounts();
   }
 
-  /* ---- Bedienung ---- */
-  elMinus.addEventListener('click', function(){ state.servings = clamp(state.servings - 1); push(); render(); });
-  elPlus .addEventListener('click', function(){ state.servings = clamp(state.servings + 1); push(); render(); });
+  /* ---------- Bedienung ---------- */
+  function setServings(v){
+    state.servings = clamp(v);
+    lastEdit = Date.now();
+    push(); render();
+  }
+  elMinus.addEventListener('click', function(){ setServings(state.servings - 1); });
+  elPlus .addEventListener('click', function(){ setServings(state.servings + 1); });
   document.getElementById('v-route').addEventListener('click', function(){ view = 'route'; saveLocal(); render(); });
   document.getElementById('v-dish') .addEventListener('click', function(){ view = 'dish';  saveLocal(); render(); });
 
@@ -468,7 +511,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     }
     clearTimeout(armed); armed = null;
     elReset.classList.remove('armed'); elReset.textContent = 'Alles abwählen';
-    state.checked = {}; push(); render();
+    state.checked = {}; lastEdit = Date.now();
+    push(); render();
   });
 
   loadLocal();
