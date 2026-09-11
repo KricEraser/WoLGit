@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark} html,body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+<title>Kalbsrouladen &amp; Gratin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F0; --surface:#FFFFFF; --surface-2:#F5F8F8;
+  --ink:#132630; --ink-soft:#5B6E78; --ink-faint:#8A9AA2;
+  --rule:#D2DBDC; --rule-soft:#E4EAEB;
+  --blue:#175A78; --blue-soft:#E2EDF1;
+  --mustard:#A8751A; --mustard-fill:#C4901F;
+  --on-blue:#FFFFFF;
+  --lift:0 1px 0 rgba(19,38,48,.03), 0 10px 24px -18px rgba(19,38,48,.45);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --cond:'Barlow Condensed','IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101A1E; --surface:#17232A; --surface-2:#1C2A31;
+    --ink:#E7EDEE; --ink-soft:#98ABB3; --ink-faint:#6E828B;
+    --rule:#27373F; --rule-soft:#203037;
+    --blue:#7CBBD6; --blue-soft:#1B2F39;
+    --mustard:#DDAA48; --mustard-fill:#C39033;
+    --on-blue:#0F1A1F;
+    --lift:0 1px 0 rgba(0,0,0,.25), 0 10px 26px -18px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101A1E; --surface:#17232A; --surface-2:#1C2A31;
+  --ink:#E7EDEE; --ink-soft:#98ABB3; --ink-faint:#6E828B;
+  --rule:#27373F; --rule-soft:#203037;
+  --blue:#7CBBD6; --blue-soft:#1B2F39;
+  --mustard:#DDAA48; --mustard-fill:#C39033;
+  --on-blue:#0F1A1F;
+  --lift:0 1px 0 rgba(0,0,0,.25), 0 10px 26px -18px rgba(0,0,0,.9);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.45;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:620px; margin:0 auto; padding-inline:18px; padding-block:24px 44px;}
+
+/* ---------- Kopf ---------- */
+.eyebrow{
+  margin:0 0 6px; font-family:var(--cond); font-weight:600;
+  text-transform:uppercase; letter-spacing:.14em; font-size:.82rem;
+  color:var(--blue);
+}
+h1{
+  margin:0; font-family:var(--cond); font-weight:700;
+  font-size:clamp(2.2rem,10vw,3.1rem); line-height:.94;
+  letter-spacing:-.005em; text-wrap:balance;
+}
+h1 .sub{display:block; font-weight:500; color:var(--ink-soft); font-size:.5em; letter-spacing:.01em; margin-top:.28em;}
+
+.meter{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+  margin-top:22px;
+}
+.meter .count{font-family:var(--cond); font-weight:700; font-size:2.4rem; line-height:1; font-variant-numeric:tabular-nums;}
+.meter .count small{font-size:.44em; font-weight:600; color:var(--ink-faint); margin-left:.15em;}
+.meter .status{font-size:.83rem; color:var(--ink-soft); text-align:right; max-width:17ch;}
+.rail{height:5px; background:var(--rule-soft); border-radius:2px; margin-top:10px; overflow:hidden;}
+.rail span{display:block; height:100%; width:0; background:var(--mustard-fill); transition:width .28s ease;}
+body.done .rail span{background:var(--blue)}
+body.done .meter .count{color:var(--blue)}
+
+/* ---------- Bedienleiste ---------- */
+.bar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;
+  margin-top:22px; padding:12px 14px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:5px;
+  box-shadow:var(--lift);
+}
+.field{display:flex; align-items:center; gap:10px;}
+.field > .lbl{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  letter-spacing:.1em; font-size:.76rem; color:var(--ink-soft);
+}
+.stepper{display:flex; align-items:center; border:1px solid var(--rule); border-radius:4px; overflow:hidden;}
+.stepper button{
+  width:34px; height:32px; border:0; background:var(--surface-2); color:var(--ink);
+  font-size:1.15rem; line-height:1; cursor:pointer; font-family:var(--sans);
+}
+.stepper button:hover:not(:disabled){background:var(--blue-soft); color:var(--blue)}
+.stepper button:disabled{color:var(--ink-faint); cursor:not-allowed}
+.stepper output{
+  min-width:62px; text-align:center; font-family:var(--mono); font-size:.9rem;
+  font-variant-numeric:tabular-nums; border-inline:1px solid var(--rule); padding:0 6px; line-height:32px;
+}
+.seg{display:flex; margin-left:auto; border:1px solid var(--rule); border-radius:4px; overflow:hidden;}
+.seg button{
+  border:0; background:var(--surface-2); color:var(--ink-soft); cursor:pointer;
+  font-family:var(--cond); font-weight:600; font-size:.88rem; letter-spacing:.04em;
+  text-transform:uppercase; padding:8px 12px;
+}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--blue); color:var(--on-blue);}
+
+/* ---------- Gruppen ---------- */
+.group{margin-top:28px}
+.group-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding-bottom:7px; border-bottom:2px solid var(--ink);
+}
+.group-head h2{
+  margin:0; font-family:var(--cond); font-weight:700; font-size:1.28rem;
+  text-transform:uppercase; letter-spacing:.06em; text-wrap:balance;
+}
+.group-head .tally{font-family:var(--mono); font-size:.8rem; color:var(--ink-soft); font-variant-numeric:tabular-nums; flex:none;}
+.group .hint{margin:8px 0 0; font-size:.82rem; color:var(--ink-faint); line-height:1.35;}
+
+ul.items{list-style:none; margin:0; padding:0;}
+ul.items li + li{border-top:1px solid var(--rule-soft)}
+
+.row{
+  display:grid; grid-template-columns:auto 1fr auto; gap:6px 13px;
+  align-items:start; padding:13px 12px 13px 10px; cursor:pointer;
+  border-left:3px solid transparent; background:var(--surface);
+  transition:background .15s ease, border-color .15s ease;
+}
+.row:hover{background:var(--surface-2)}
+.row input{position:absolute; opacity:0; width:1px; height:1px;}
+.box{
+  width:25px; height:25px; margin-top:1px; flex:none;
+  border:1.5px solid var(--ink-soft); border-radius:3px; background:transparent;
+  position:relative; transition:background .15s ease, border-color .15s ease;
+}
+.box::after{
+  content:""; position:absolute; inset:0; margin:auto;
+  width:6px; height:11px; border:solid #fff; border-width:0 2.5px 2.5px 0;
+  transform:rotate(42deg) translateY(-1px) scale(.4); opacity:0;
+  transition:opacity .15s ease, transform .15s ease;
+}
+.name{font-weight:500; text-wrap:pretty}
+.note{grid-column:2; font-size:.82rem; color:var(--ink-soft); line-height:1.35; margin-top:1px;}
+.qty{
+  font-family:var(--mono); font-size:.88rem; font-variant-numeric:tabular-nums;
+  white-space:nowrap; color:var(--ink); padding-top:2px; text-align:right;
+}
+.chip{
+  display:inline-block; margin-left:8px; vertical-align:1px; white-space:nowrap;
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  letter-spacing:.09em; font-size:.7rem; color:var(--ink-faint);
+  border-bottom:1px solid var(--rule);
+}
+.row input:focus-visible + .box{outline:2px solid var(--blue); outline-offset:2px}
+
+.row.on{border-left-color:var(--mustard-fill); background:var(--surface-2)}
+.row.on .box{background:var(--mustard-fill); border-color:var(--mustard-fill)}
+.row.on .box::after{opacity:1; transform:rotate(42deg) translateY(-1px) scale(1)}
+.row.on .name{text-decoration:line-through; text-decoration-thickness:1.5px; text-decoration-color:var(--ink-faint); color:var(--ink-soft)}
+.row.on .note, .row.on .qty{color:var(--ink-faint)}
+
+/* ---------- Fuß ---------- */
+.facts{
+  margin-top:34px; padding:16px 16px 14px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:5px;
+}
+.facts h2{
+  margin:0 0 10px; font-family:var(--cond); font-weight:600; font-size:.82rem;
+  text-transform:uppercase; letter-spacing:.14em; color:var(--blue);
+}
+.facts dl{margin:0; display:grid; gap:9px}
+.facts .fact{display:grid; grid-template-columns:7.5rem 1fr; gap:4px 12px;}
+.facts dt{font-family:var(--cond); font-weight:600; font-size:1rem; letter-spacing:.02em;}
+.facts dd{margin:0; font-size:.87rem; color:var(--ink-soft)}
+@media (max-width:420px){ .facts .fact{grid-template-columns:1fr} }
+
+.foot{
+  display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  margin-top:18px; font-size:.8rem; color:var(--ink-faint);
+}
+.sync{display:flex; align-items:center; gap:7px}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--ink-faint); flex:none}
+.sync.live .dot{background:var(--mustard-fill)}
+#reset{
+  margin-left:auto; border:1px solid var(--rule); background:var(--surface);
+  color:var(--ink-soft); font-family:var(--sans); font-size:.8rem;
+  padding:7px 12px; border-radius:4px; cursor:pointer;
+}
+#reset:hover{color:var(--ink); border-color:var(--ink-soft)}
+#reset.armed{border-color:var(--mustard); color:var(--mustard)}
+button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Einkaufszettel</p>
+    <h1>Kalbsrouladen<span class="sub">mit Kartoffelgratin</span></h1>
+
+    <div class="meter">
+      <div class="count" id="count">0<small>/21</small></div>
+      <div class="status" id="status">Noch nichts im Wagen</div>
+    </div>
+    <div class="rail"><span id="rail"></span></div>
+  </header>
+
+  <div class="bar">
+    <div class="field">
+      <span class="lbl" id="lbl-portionen">Portionen</span>
+      <div class="stepper">
+        <button type="button" id="minus" aria-label="Eine Portion weniger">−</button>
+        <output id="servings" for="minus plus" aria-labelledby="lbl-portionen">4 Personen</output>
+        <button type="button" id="plus" aria-label="Eine Portion mehr">+</button>
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="Sortierung">
+      <button type="button" id="v-route" aria-pressed="true">Ladenweg</button>
+      <button type="button" id="v-dish" aria-pressed="false">Gericht</button>
+    </div>
+  </div>
+
+  <main id="list"></main>
+
+  <section class="facts">
+    <h2>Wenn alles im Haus ist</h2>
+    <dl>
+      <div class="fact"><dt>Rouladen</dt><dd>Füllen, rollen, scharf anbraten, ablöschen — dann 90 Minuten zugedeckt bei kleiner Hitze schmoren.</dd></div>
+      <div class="fact"><dt>Gratin</dt><dd>180 °C Ober-/Unterhitze, 55–65 Minuten. Die letzten 10 Minuten offen, damit der Käse Farbe bekommt.</dd></div>
+      <div class="fact"><dt>Timing</dt><dd>Das Gratin kommt in den Ofen, sobald die Rouladen schmoren. Dann ist beides gleichzeitig fertig.</dd></div>
+    </dl>
+  </section>
+
+  <div class="foot">
+    <span class="sync" id="sync"><span class="dot"></span><span id="sync-text">Nur auf diesem Gerät gespeichert</span></span>
+    <button type="button" id="reset">Alles abwählen</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ITEMS = [
+    {id:'rouladen',    name:'Kalbsrouladen',                aisle:'theke',     dish:'rouladen', per:1,   unit:'Stück', note:'Aus der Oberschale, dünn geschnitten — vom Metzger flach klopfen lassen, je ca. 160 g.'},
+    {id:'kartoffeln',  name:'Festkochende Kartoffeln',      aisle:'gemuese',   dish:'gratin',   per:375, step:250, unit:'g', note:'Linda oder Annabelle — sie zerfallen beim Backen nicht.'},
+    {id:'zwiebeln',    name:'Zwiebeln',                     aisle:'gemuese',   dish:'rouladen', per:0.75, unit:'Stück', note:'Zwei in die Füllung, eine in den Schmorfond.'},
+    {id:'knoblauch',   name:'Knoblauch',                    aisle:'gemuese',   dish:'gratin',   fixed:'1 Zehe', note:'Halbiert, zum Ausreiben der Gratinform.'},
+    {id:'suppengruen', name:'Suppengrün',                   aisle:'gemuese',   dish:'sauce',    fixed:'1 Bund', note:'Möhre, Sellerie, Lauch — Grundlage der Soße.'},
+    {id:'petersilie',  name:'Glatte Petersilie',            aisle:'gemuese',   dish:'sauce',    fixed:'½ Bund', note:'Zum Schluss über die Soße.'},
+    {id:'speck',       name:'Frühstücksspeck in Scheiben',  aisle:'kuehl',     dish:'rouladen', per:25,  step:25,  unit:'g', note:'Legt die Rouladen innen aus.'},
+    {id:'sahne',       name:'Sahne',                        aisle:'kuehl',     dish:'gratin',   per:50,  step:50,  unit:'ml'},
+    {id:'milch',       name:'Milch',                        aisle:'kuehl',     dish:'gratin',   per:50,  step:50,  unit:'ml'},
+    {id:'kaese',       name:'Bergkäse oder Gruyère',        aisle:'kuehl',     dish:'gratin',   per:40,  step:25,  unit:'g', note:'Am Stück kaufen und selbst reiben — schmilzt deutlich besser.'},
+    {id:'butter',      name:'Butter',                       aisle:'kuehl',     dish:'gratin',   per:15,  step:25,  unit:'g', note:'Für die Form und zum Anbraten.'},
+    {id:'gurken',      name:'Gewürzgurken',                 aisle:'trocken',   dish:'rouladen', fixed:'1 Glas', note:'Mittelgroß, längs geviertelt.'},
+    {id:'fond',        name:'Kalbs- oder Rinderfond',       aisle:'trocken',   dish:'sauce',    per:125, step:100, unit:'ml', note:'Notfalls kräftige Brühe.'},
+    {id:'senf',        name:'Mittelscharfer Senf',          aisle:'trocken',   dish:'rouladen', fixed:'1 Glas', pantry:true, note:'Zum Bestreichen vor dem Füllen.'},
+    {id:'tomatenmark', name:'Tomatenmark',                  aisle:'trocken',   dish:'sauce',    fixed:'1 Dose', pantry:true},
+    {id:'mehl',        name:'Mehl oder Speisestärke',       aisle:'trocken',   dish:'sauce',    fixed:'2 EL',   pantry:true, note:'Zum Andicken am Ende.'},
+    {id:'gewuerze',    name:'Lorbeer & Wacholderbeeren',    aisle:'trocken',   dish:'sauce',    fixed:'je 2–3', pantry:true},
+    {id:'muskat',      name:'Muskatnuss',                   aisle:'trocken',   dish:'gratin',   fixed:'1 Stück', pantry:true, note:'Frisch in die Gratinsahne reiben.'},
+    {id:'salzpfeffer', name:'Salz & Pfeffer',               aisle:'trocken',   dish:'rouladen', fixed:'nach Bedarf', pantry:true},
+    {id:'rotwein',     name:'Trockener Rotwein',            aisle:'getraenke', dish:'sauce',    per:60,  step:50,  unit:'ml', note:'Zum Ablöschen — der Rest passt zum Essen.'},
+    {id:'garn',        name:'Küchengarn oder Rouladennadeln', aisle:'haushalt', dish:'rouladen', fixed:'1 Rolle', pantry:true}
+  ];
+
+  var AISLES = [
+    ['theke','Fleischtheke','Am besten einen Tag vorher bestellen'],
+    ['gemuese','Obst & Gemüse',''],
+    ['kuehl','Kühlregal & Molkerei',''],
+    ['trocken','Konserven & Trockenes',''],
+    ['getraenke','Getränke',''],
+    ['haushalt','Haushalt','']
+  ];
+  var DISHES = [
+    ['rouladen','Die Rouladen','Füllen, rollen, anbraten'],
+    ['sauce','Die Schmorsoße','Zieht anderthalb Stunden mit'],
+    ['gratin','Das Kartoffelgratin','Kommt parallel in den Ofen']
+  ];
+
+  var MIN = 2, MAX = 10;
+  var nf = new Intl.NumberFormat('de-DE', {maximumFractionDigits:2});
+  var state = {servings:4, checked:{}};
+  var view = 'route';
+  var LS = 'kalbsrouladen-einkauf-v1';
+
+  var elList = document.getElementById('list');
+  var elCount = document.getElementById('count');
+  var elRail = document.getElementById('rail');
+  var elStatus = document.getElementById('status');
+  var elServings = document.getElementById('servings');
+  var elMinus = document.getElementById('minus');
+  var elPlus = document.getElementById('plus');
+  var elReset = document.getElementById('reset');
+  var elSync = document.getElementById('sync');
+  var elSyncText = document.getElementById('sync-text');
+
+  /* ---- Mengen ---- */
+  function qty(it, n){
+    if (it.fixed) return it.fixed;
+    var v = it.per * n;
+    if (it.unit === 'Stück') { v = Math.ceil(v); }
+    else { v = Math.round(v / it.step) * it.step; if (v < it.step) v = it.step; }
+    if (it.unit === 'g'  && v >= 1000) return nf.format(v/1000) + ' kg';
+    if (it.unit === 'ml' && v >= 1000) return nf.format(v/1000) + ' l';
+    return nf.format(v) + ' ' + it.unit;
+  }
+
+  /* ---- Speichern ---- */
+  function saveLocal(){
+    try { localStorage.setItem(LS, JSON.stringify({servings:state.servings, checked:state.checked, view:view})); } catch(e){}
+  }
+  function loadLocal(){
+    try {
+      var raw = localStorage.getItem(LS); if (!raw) return;
+      var d = JSON.parse(raw); if (!d || typeof d !== 'object') return;
+      if (typeof d.servings === 'number') state.servings = clamp(d.servings);
+      if (d.checked && typeof d.checked === 'object') state.checked = d.checked;
+      if (d.view === 'dish' || d.view === 'route') view = d.view;
+    } catch(e){}
+  }
+  function clamp(n){ n = Math.round(n) || 4; return Math.min(MAX, Math.max(MIN, n)); }
+
+  var doc = null, pushTimer = null;
+  function push(){
+    saveLocal();
+    if (!doc) return;
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = setTimeout(function(){
+      pushTimer = null;
+      doc.set({servings:state.servings, checked:state.checked, updatedAt:new Date().toISOString()})
+         .catch(function(){});
+    }, 400);
+  }
+
+  try {
+    if (window.claude && typeof window.claude.use === 'function'){
+      window.claude.use('db').then(function(db){
+        if (!db) return;
+        doc = db.doc('einkauf/kalbsrouladen');
+        elSync.className = 'sync live';
+        elSyncText.textContent = 'Wird geräteübergreifend gespeichert';
+        doc.onSnapshot(function(snap){
+          if (pushTimer) return;                 // eigene Änderung ist noch unterwegs
+          if (!snap.exists){ push(); return; }   // erstes Mal: lokalen Stand hochschieben
+          var d = snap.data() || {};
+          if (typeof d.servings === 'number') state.servings = clamp(d.servings);
+          state.checked = (d.checked && typeof d.checked === 'object') ? d.checked : {};
+          saveLocal();
+          render();
+        }, function(){
+          doc = null;
+          elSync.className = 'sync';
+          elSyncText.textContent = 'Nur auf diesem Gerät gespeichert';
+        });
+      }).catch(function(){});
+    }
+  } catch(e){}
+
+  /* ---- Zeichnen ---- */
+  function groups(){
+    if (view === 'dish'){
+      return DISHES.map(function(g){
+        return {label:g[1], hint:g[2], items:ITEMS.filter(function(i){ return i.dish === g[0]; })};
+      });
+    }
+    return AISLES.map(function(g){
+      return {label:g[1], hint:g[2], items:ITEMS.filter(function(i){ return i.aisle === g[0]; })};
+    });
+  }
+
+  function render(){
+    var n = state.servings;
+    elServings.textContent = n + (n === 1 ? ' Person' : ' Personen');
+    elMinus.disabled = n <= MIN;
+    elPlus.disabled = n >= MAX;
+    document.getElementById('v-route').setAttribute('aria-pressed', String(view === 'route'));
+    document.getElementById('v-dish').setAttribute('aria-pressed', String(view === 'dish'));
+
+    elList.textContent = '';
+    groups().forEach(function(g){
+      var sec = document.createElement('section');
+      sec.className = 'group';
+
+      var head = document.createElement('div');
+      head.className = 'group-head';
+      var h2 = document.createElement('h2'); h2.textContent = g.label;
+      var tally = document.createElement('span'); tally.className = 'tally';
+      var done = g.items.filter(function(i){ return state.checked[i.id]; }).length;
+      tally.textContent = done + '/' + g.items.length;
+      head.appendChild(h2); head.appendChild(tally);
+      sec.appendChild(head);
+      if (g.hint){
+        var hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = g.hint;
+        sec.appendChild(hint);
+      }
+
+      var ul = document.createElement('ul'); ul.className = 'items';
+      g.items.forEach(function(it){
+        var li = document.createElement('li');
+        var label = document.createElement('label');
+        label.className = 'row' + (state.checked[it.id] ? ' on' : '');
+
+        var input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = 'chk-' + it.id;
+        input.checked = !!state.checked[it.id];
+        input.addEventListener('change', function(){
+          if (input.checked) state.checked[it.id] = true; else delete state.checked[it.id];
+          push(); render();
+        });
+
+        var box = document.createElement('span'); box.className = 'box'; box.setAttribute('aria-hidden','true');
+
+        var name = document.createElement('span'); name.className = 'name';
+        name.appendChild(document.createTextNode(it.name));
+        if (it.pantry){
+          var chip = document.createElement('span'); chip.className = 'chip';
+          chip.textContent = 'Vorrat prüfen'; name.appendChild(chip);
+        }
+
+        var q = document.createElement('span'); q.className = 'qty'; q.textContent = qty(it, n);
+
+        label.appendChild(input); label.appendChild(box); label.appendChild(name); label.appendChild(q);
+        if (it.note){
+          var note = document.createElement('span'); note.className = 'note'; note.textContent = it.note;
+          label.appendChild(note);
+        }
+        li.appendChild(label); ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+      elList.appendChild(sec);
+    });
+
+    var total = ITEMS.length;
+    var got = ITEMS.filter(function(i){ return state.checked[i.id]; }).length;
+    elCount.textContent = '';
+    elCount.appendChild(document.createTextNode(String(got)));
+    var small = document.createElement('small'); small.textContent = '/' + total;
+    elCount.appendChild(small);
+    elRail.style.width = Math.round(got / total * 100) + '%';
+    document.body.classList.toggle('done', got === total);
+    elStatus.textContent = got === 0 ? 'Noch nichts im Wagen'
+      : got === total ? 'Alles beisammen — ab in die Küche'
+      : 'Noch ' + (total - got) + (total - got === 1 ? ' Position' : ' Positionen');
+  }
+
+  /* ---- Bedienung ---- */
+  elMinus.addEventListener('click', function(){ state.servings = clamp(state.servings - 1); push(); render(); });
+  elPlus .addEventListener('click', function(){ state.servings = clamp(state.servings + 1); push(); render(); });
+  document.getElementById('v-route').addEventListener('click', function(){ view = 'route'; saveLocal(); render(); });
+  document.getElementById('v-dish') .addEventListener('click', function(){ view = 'dish';  saveLocal(); render(); });
+
+  var armed = null;
+  elReset.addEventListener('click', function(){
+    if (!armed){
+      elReset.classList.add('armed');
+      elReset.textContent = 'Wirklich? Nochmal tippen';
+      armed = setTimeout(function(){
+        armed = null; elReset.classList.remove('armed'); elReset.textContent = 'Alles abwählen';
+      }, 4000);
+      return;
+    }
+    clearTimeout(armed); armed = null;
+    elReset.classList.remove('armed'); elReset.textContent = 'Alles abwählen';
+    state.checked = {}; push(); render();
+  });
+
+  loadLocal();
+  render();
+})();
+</script>
+
+</body>
+</html>
