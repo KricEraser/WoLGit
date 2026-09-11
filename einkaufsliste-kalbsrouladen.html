@@ -160,20 +160,71 @@ ul.items li + li{border-top:1px solid var(--rule-soft)}
 .row.on .name{text-decoration:line-through; text-decoration-thickness:1.5px; text-decoration-color:var(--ink-faint); color:var(--ink-soft)}
 .row.on .note, .row.on .qty{color:var(--ink-faint)}
 
+/* ---------- Reiter ---------- */
+.tabs{display:flex; gap:26px; margin-top:24px; border-bottom:1px solid var(--rule);}
+.tabs button{
+  border:0; background:none; cursor:pointer; padding:0 0 10px; margin-bottom:-1px;
+  font-family:var(--cond); font-weight:600; font-size:1.12rem; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--ink-faint); border-bottom:2px solid transparent;
+}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--mustard-fill);}
+.tabs button:hover{color:var(--ink)}
+
+/* ---------- Zeitplan ---------- */
+.plan{margin-top:26px; padding:16px 16px 6px; background:var(--surface); border:1px solid var(--rule); border-radius:5px;}
+.plan-head{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin-bottom:14px;}
+.plan-head h2{
+  margin:0; font-family:var(--cond); font-weight:600; font-size:.82rem;
+  text-transform:uppercase; letter-spacing:.14em; color:var(--blue); flex:1;
+}
+.plan-head label{font-size:.84rem; color:var(--ink-soft)}
+.plan-head input{
+  font-family:var(--mono); font-size:.92rem; margin-left:8px; padding:5px 8px;
+  border:1px solid var(--rule); border-radius:4px; background:var(--surface-2);
+  color:var(--ink); color-scheme:inherit;
+}
+.plan ol{list-style:none; margin:0; padding:0 0 10px; position:relative;}
+.plan ol::before{content:""; position:absolute; left:52px; top:6px; bottom:16px; width:1px; background:var(--rule);}
+.plan li{display:grid; grid-template-columns:46px 1fr; gap:14px; align-items:baseline; padding:6px 0; position:relative;}
+.plan li::before{
+  content:""; position:absolute; left:49px; top:11px; width:7px; height:7px;
+  border-radius:50%; background:var(--rule); border:1.5px solid var(--surface);
+}
+.plan li.key::before{background:var(--mustard-fill)}
+.plan .t{font-family:var(--mono); font-size:.88rem; font-variant-numeric:tabular-nums; color:var(--ink-soft); text-align:right;}
+.plan li.key .t{color:var(--ink); font-weight:500}
+.plan .what{font-size:.9rem; padding-left:10px}
+.plan li.key .what{font-weight:500}
+
+/* ---------- Kochschritte ---------- */
+.phase{margin-top:28px}
+.phase-head{display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding-bottom:7px; border-bottom:2px solid var(--ink);}
+.phase-head h2{margin:0; font-family:var(--cond); font-weight:700; font-size:1.28rem; text-transform:uppercase; letter-spacing:.06em;}
+.phase-head .dur{font-family:var(--mono); font-size:.8rem; color:var(--ink-soft); flex:none; white-space:nowrap;}
+ul.steps{list-style:none; margin:0; padding:0}
+ul.steps li + li{border-top:1px solid var(--rule-soft)}
+.step{
+  display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start;
+  padding:14px 12px 14px 10px; cursor:pointer; border-left:3px solid transparent;
+  background:var(--surface); transition:background .15s ease, border-color .15s ease;
+}
+.step:hover{background:var(--surface-2)}
+.step input{position:absolute; opacity:0; width:1px; height:1px;}
+.num{
+  width:26px; height:26px; flex:none; display:grid; place-items:center;
+  font-family:var(--cond); font-weight:600; font-size:.95rem; line-height:1;
+  border:1.5px solid var(--ink-soft); border-radius:3px; color:var(--ink-soft);
+  font-variant-numeric:tabular-nums; transition:background .15s ease, color .15s ease, border-color .15s ease;
+}
+.step .text{line-height:1.5; text-wrap:pretty}
+.step input:focus-visible + .num{outline:2px solid var(--blue); outline-offset:2px}
+.step.on{border-left-color:var(--mustard-fill); background:var(--surface-2)}
+.step.on .num{background:var(--mustard-fill); border-color:var(--mustard-fill); color:var(--surface)}
+.step.on .text{color:var(--ink-faint)}
+.step .text b{font-weight:600; font-family:var(--mono); font-size:.92em; color:inherit;}
+
 /* ---------- Fuß ---------- */
-.facts{
-  margin-top:34px; padding:16px 16px 14px;
-  background:var(--surface); border:1px solid var(--rule); border-radius:5px;
-}
-.facts h2{
-  margin:0 0 10px; font-family:var(--cond); font-weight:600; font-size:.82rem;
-  text-transform:uppercase; letter-spacing:.14em; color:var(--blue);
-}
-.facts dl{margin:0; display:grid; gap:9px}
-.facts .fact{display:grid; grid-template-columns:7.5rem 1fr; gap:4px 12px;}
-.facts dt{font-family:var(--cond); font-weight:600; font-size:1rem; letter-spacing:.02em;}
-.facts dd{margin:0; font-size:.87rem; color:var(--ink-soft)}
-@media (max-width:420px){ .facts .fact{grid-template-columns:1fr} }
+
 
 .foot{
   display:flex; flex-wrap:wrap; align-items:center; gap:12px;
@@ -209,6 +260,11 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     <div class="rail"><span id="rail"></span></div>
   </header>
 
+  <div class="tabs" role="tablist">
+    <button type="button" id="t-einkauf" role="tab" aria-selected="true" aria-controls="list">Einkauf</button>
+    <button type="button" id="t-kochen" role="tab" aria-selected="false" aria-controls="recipe">Zubereitung</button>
+  </div>
+
   <div class="bar">
     <div class="field">
       <span class="lbl" id="lbl-portionen">Portionen</span>
@@ -218,22 +274,24 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
         <button type="button" id="plus" aria-label="Eine Portion mehr">+</button>
       </div>
     </div>
-    <div class="seg" role="group" aria-label="Sortierung">
+    <div class="seg" id="sortierung" role="group" aria-label="Sortierung">
       <button type="button" id="v-route" aria-pressed="true">Ladenweg</button>
       <button type="button" id="v-dish" aria-pressed="false">Gericht</button>
     </div>
   </div>
 
-  <main id="list"></main>
+  <main id="list" role="tabpanel" aria-labelledby="t-einkauf"></main>
 
-  <section class="facts">
-    <h2>Wenn alles im Haus ist</h2>
-    <dl>
-      <div class="fact"><dt>Rouladen</dt><dd>Füllen, rollen, scharf anbraten, ablöschen — dann 90 Minuten zugedeckt bei kleiner Hitze schmoren.</dd></div>
-      <div class="fact"><dt>Gratin</dt><dd>180 °C Ober-/Unterhitze, 55–65 Minuten. Die letzten 10 Minuten offen, damit der Käse Farbe bekommt.</dd></div>
-      <div class="fact"><dt>Timing</dt><dd>Das Gratin kommt in den Ofen, sobald die Rouladen schmoren. Dann ist beides gleichzeitig fertig.</dd></div>
-    </dl>
-  </section>
+  <div id="recipe" role="tabpanel" aria-labelledby="t-kochen" hidden>
+    <section class="plan">
+      <div class="plan-head">
+        <h2>Rückwärts geplant</h2>
+        <label for="mealtime">Essen um<input type="time" id="mealtime" value="18:00"></label>
+      </div>
+      <ol id="plan-list"></ol>
+    </section>
+    <div id="steps"></div>
+  </div>
 
   <div class="foot">
     <span class="sync" id="sync"><span class="dot"></span><span id="sync-text">Nur auf diesem Gerät gespeichert</span></span>
@@ -283,14 +341,58 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     ['gratin','Das Kartoffelgratin','Kommt parallel in den Ofen']
   ];
 
+  var STEPS = [
+    {phase:'Vorbereiten', dur:'15 Min.', items:[
+      {id:'s1', text:'Zwiebeln schälen: zwei fein würfeln für die Füllung, eine grob für den Fond. Gewürzgurken längs vierteln, Suppengrün putzen und in grobe Stücke schneiden.'},
+      {id:'s2', text:'Die Kalbsrouladen flach auf ein Brett legen, salzen, pfeffern und dünn mit Senf bestreichen.'},
+      {id:'s3', text:'Auf jede Roulade ein bis zwei Scheiben Speck legen, die Zwiebelwürfel darauf verteilen und ein bis zwei Gurkenviertel ans breite Ende setzen.'},
+      {id:'s4', text:'Die Längsseiten leicht einschlagen, vom breiten Ende her fest aufrollen und mit Küchengarn binden oder mit Rouladennadeln feststecken. Außen noch einmal salzen und pfeffern.'}
+    ]},
+    {phase:'Anbraten & schmoren', dur:'20 Min. + 90 Min.', items:[
+      {id:'s5', text:'Butterschmalz im Schmortopf stark erhitzen und die Rouladen rundherum kräftig braun anbraten, dann herausnehmen. Diese Farbe ist später der Geschmack der Soße — hier nicht hetzen.'},
+      {id:'s6', text:'Hitze etwas zurücknehmen, grobe Zwiebel und Suppengrün im Bratensatz anrösten, bis sie Farbe nehmen. Tomatenmark zugeben und ein bis zwei Minuten mitrösten, bis es dunkel wird und süßlich riecht.'},
+      {id:'s7', text:'Mit {rotwein} Rotwein ablöschen und den Bratensatz vom Boden lösen. Fast vollständig einkochen lassen, dann {fond} Fond angießen, Lorbeer und Wacholder dazu.'},
+      {id:'s8', text:'Rouladen zurück in den Topf legen — die Flüssigkeit sollte sie zu etwa zwei Dritteln bedecken. Zugedeckt bei kleiner Hitze 90 Minuten schmoren, dabei zweimal wenden.'}
+    ]},
+    {phase:'Das Gratin', dur:'15 Min. + 55–65 Min.', items:[
+      {id:'s9',  text:'Ofen auf 180 °C Ober-/Unterhitze vorheizen. Auflaufform mit der halbierten Knoblauchzehe ausreiben, anschließend mit Butter ausstreichen.'},
+      {id:'s10', text:'{kartoffeln} Kartoffeln schälen und in zwei bis drei Millimeter dünne Scheiben hobeln. Nicht wässern — die Stärke ist es, die das Gratin bindet.'},
+      {id:'s11', text:'{sahne} Sahne und {milch} Milch verrühren und kräftig mit Salz, Pfeffer und frisch geriebener Muskatnuss würzen.'},
+      {id:'s12', text:'Die Scheiben dachziegelartig einschichten, dazwischen etwas von den {kaese} Käse verteilen. Sahnemischung angießen, restlichen Käse obenauf, ein paar Butterflöckchen darauf.'},
+      {id:'s13', text:'55 bis 65 Minuten backen. Wird der Käse zu früh dunkel, mit Folie abdecken und die letzten zehn Minuten offen fertig backen. Fertig ist es, wenn ein Messer ohne Widerstand durchgleitet.'}
+    ]},
+    {phase:'Soße & anrichten', dur:'10 Min.', items:[
+      {id:'s14', text:'Rouladen aus dem Topf nehmen und warm stellen. Die Soße durch ein Sieb gießen, das Gemüse dabei gut ausdrücken, Lorbeer und Wacholder wegwerfen.'},
+      {id:'s15', text:'Soße aufkochen. {mehl} Mehl in etwas kaltem Wasser glattrühren, einrühren und sämig kochen lassen. Mit Salz, Pfeffer und einem Löffel Senf abschmecken, zum Schluss ein Stück kalte Butter einrühren — das macht sie glänzend.'},
+      {id:'s16', text:'Garn oder Nadeln entfernen, die Rouladen in der Soße kurz erwärmen. Mit dem Gratin anrichten und die gehackte Petersilie darüber geben.'}
+    ]}
+  ];
+
+  // Minuten vor dem Essen; key = die drei Zeitpunkte, die wirklich sitzen müssen
+  var PLAN = [
+    [-135, 'Fleisch vorbereiten: füllen, rollen, binden', false],
+    [-120, 'Rouladen anbraten, Röstgemüse und Fond ansetzen', false],
+    [-100, 'Schmoren beginnt — 90 Minuten bei kleiner Hitze', true],
+    [-75,  'Ofen anstellen, Kartoffeln hobeln, Gratin schichten', false],
+    [-65,  'Gratin in den Ofen — 55 bis 65 Minuten', true],
+    [-10,  'Rouladen herausnehmen, Soße passieren und binden', false],
+    [0,    'Servieren', true]
+  ];
+
+  var BY_ID = {};
+  ITEMS.forEach(function(i){ BY_ID[i.id] = i; });
+  var ALL_STEPS = [];
+  STEPS.forEach(function(ph){ ALL_STEPS = ALL_STEPS.concat(ph.items); });
+
   var MIN = 2, MAX = 10, LS = 'kalbsrouladen-einkauf-v1';
   var nf = new Intl.NumberFormat('de-DE', {maximumFractionDigits:2});
 
   // state.checked ist IMMER ein eigenes, beschreibbares Objekt. Snapshots aus
   // der Datenbank kommen eingefroren zurueck, deshalb wird alles von dort
   // kopiert, bevor es in den Zustand wandert.
-  var state = {servings:4, checked:{}};
+  var state = {servings:4, checked:{}, steps:{}, mealTime:'18:00'};
   var view = 'route';
+  var tab = 'einkauf';
   var lastEdit = 0;
 
   var elList = document.getElementById('list');
@@ -303,6 +405,13 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
   var elReset = document.getElementById('reset');
   var elSync = document.getElementById('sync');
   var elSyncText = document.getElementById('sync-text');
+  var elRecipe = document.getElementById('recipe');
+  var elSteps = document.getElementById('steps');
+  var elPlan = document.getElementById('plan-list');
+  var elMeal = document.getElementById('mealtime');
+  var elSort = document.getElementById('sortierung');
+  var elTabE = document.getElementById('t-einkauf');
+  var elTabK = document.getElementById('t-kochen');
 
   function copyChecked(src){
     var out = {};
@@ -325,7 +434,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
 
   /* ---------- Speichern ---------- */
   function saveLocal(){
-    try { localStorage.setItem(LS, JSON.stringify({servings:state.servings, checked:state.checked, view:view, rev:lastEdit})); } catch(e){}
+    try { localStorage.setItem(LS, JSON.stringify({servings:state.servings, checked:state.checked,
+      steps:state.steps, mealTime:state.mealTime, view:view, tab:tab, rev:lastEdit})); } catch(e){}
   }
   function loadLocal(){
     try {
@@ -333,8 +443,11 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
       var d = JSON.parse(raw); if (!d || typeof d !== 'object') return;
       if (typeof d.servings === 'number') state.servings = clamp(d.servings);
       state.checked = copyChecked(d.checked);
+      state.steps = copyChecked(d.steps);
+      if (typeof d.mealTime === 'string') state.mealTime = d.mealTime;
       if (typeof d.rev === 'number') lastEdit = d.rev;
       if (d.view === 'dish' || d.view === 'route') view = d.view;
+      if (d.tab === 'kochen' || d.tab === 'einkauf') tab = d.tab;
     } catch(e){}
   }
 
@@ -351,7 +464,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     if (pushTimer) clearTimeout(pushTimer);
     pushTimer = setTimeout(function(){
       pushTimer = null; inflight++;
-      doc.set({servings:state.servings, checked:state.checked, rev:lastEdit, updatedAt:new Date().toISOString()})
+      doc.set({servings:state.servings, checked:state.checked, steps:state.steps,
+               mealTime:state.mealTime, rev:lastEdit, updatedAt:new Date().toISOString()})
         .then(function(){ inflight--; }, function(){
           inflight--; doc = null;
           syncLabel(false, 'Nur auf diesem Gerät gespeichert');
@@ -373,6 +487,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
           if (typeof d.rev === 'number' && d.rev < lastEdit) return;   // veralteter Stand
           if (typeof d.servings === 'number') state.servings = clamp(d.servings);
           state.checked = copyChecked(d.checked);
+          state.steps = copyChecked(d.steps);
+          if (typeof d.mealTime === 'string') state.mealTime = d.mealTime;
           if (typeof d.rev === 'number') lastEdit = d.rev;
           saveLocal();
           render();
@@ -400,23 +516,115 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
       var done = t.items.filter(function(i){ return state.checked[i.id]; }).length;
       t.el.textContent = done + '/' + t.items.length;
     });
-    var total = ITEMS.length;
-    var got = ITEMS.filter(function(i){ return state.checked[i.id]; }).length;
+
+    var kochen = tab === 'kochen';
+    var pool = kochen ? ALL_STEPS : ITEMS;
+    var map  = kochen ? state.steps : state.checked;
+    var total = pool.length;
+    var got = pool.filter(function(x){ return map[x.id]; }).length;
+    var offen = total - got;
+
     elCount.textContent = '';
     elCount.appendChild(document.createTextNode(String(got)));
     var small = document.createElement('small'); small.textContent = '/' + total;
     elCount.appendChild(small);
     elRail.style.width = Math.round(got / total * 100) + '%';
     document.body.classList.toggle('done', got === total);
-    elStatus.textContent = got === 0 ? 'Noch nichts im Wagen'
-      : got === total ? 'Alles beisammen — ab in die Küche'
-      : 'Noch ' + (total - got) + (total - got === 1 ? ' Position' : ' Positionen');
+
+    if (kochen){
+      elStatus.textContent = got === 0 ? 'Noch nicht angefangen'
+        : got === total ? 'Fertig — guten Appetit'
+        : 'Noch ' + offen + (offen === 1 ? ' Schritt' : ' Schritte');
+    } else {
+      elStatus.textContent = got === 0 ? 'Noch nichts im Wagen'
+        : got === total ? 'Alles beisammen — ab in die Küche'
+        : 'Noch ' + offen + (offen === 1 ? ' Position' : ' Positionen');
+    }
+    elReset.textContent = kochen ? 'Schritte zurücksetzen' : 'Alles abwählen';
+  }
+
+  // Mengenplatzhalter wie {kartoffeln} durch die berechnete Menge ersetzen
+  function fillText(el, str){
+    var re = /\{(\w+)\}/g, last = 0, m;
+    while ((m = re.exec(str)) !== null){
+      if (m.index > last) el.appendChild(document.createTextNode(str.slice(last, m.index)));
+      var b = document.createElement('b');
+      b.textContent = BY_ID[m[1]] ? qty(BY_ID[m[1]], state.servings) : m[0];
+      el.appendChild(b);
+      last = re.lastIndex;
+    }
+    if (last < str.length) el.appendChild(document.createTextNode(str.slice(last)));
+  }
+
+  function clock(offset){
+    var parts = String(state.mealTime || '18:00').split(':');
+    var h = parseInt(parts[0], 10), mi = parseInt(parts[1], 10);
+    if (isNaN(h)) h = 18; if (isNaN(mi)) mi = 0;
+    var total = ((h * 60 + mi + offset) % 1440 + 1440) % 1440;
+    var hh = Math.floor(total / 60), mm = total % 60;
+    return (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+  }
+
+  function renderPlan(){
+    elPlan.textContent = '';
+    PLAN.forEach(function(row){
+      var li = document.createElement('li');
+      if (row[2]) li.className = 'key';
+      var t = document.createElement('span'); t.className = 't'; t.textContent = clock(row[0]);
+      var w = document.createElement('span'); w.className = 'what'; w.textContent = row[1];
+      li.appendChild(t); li.appendChild(w); elPlan.appendChild(li);
+    });
+  }
+
+  function renderSteps(){
+    elSteps.textContent = '';
+    var n = 0;
+    STEPS.forEach(function(ph){
+      var sec = document.createElement('section'); sec.className = 'phase';
+      var head = document.createElement('div'); head.className = 'phase-head';
+      var h2 = document.createElement('h2'); h2.textContent = ph.phase;
+      var dur = document.createElement('span'); dur.className = 'dur'; dur.textContent = ph.dur;
+      head.appendChild(h2); head.appendChild(dur); sec.appendChild(head);
+
+      var ul = document.createElement('ul'); ul.className = 'steps';
+      ph.items.forEach(function(st){
+        n++;
+        var li = document.createElement('li');
+        var label = document.createElement('label');
+        label.className = 'step' + (state.steps[st.id] ? ' on' : '');
+
+        var input = document.createElement('input');
+        input.type = 'checkbox'; input.id = 'chk-' + st.id;
+        input.checked = !!state.steps[st.id];
+        input.addEventListener('change', function(){ toggleStep(st, label, input.checked); });
+
+        var num = document.createElement('span'); num.className = 'num';
+        num.setAttribute('aria-hidden','true'); num.textContent = String(n);
+
+        var text = document.createElement('span'); text.className = 'text';
+        fillText(text, st.text);
+
+        label.appendChild(input); label.appendChild(num); label.appendChild(text);
+        li.appendChild(label); ul.appendChild(li);
+      });
+      sec.appendChild(ul); elSteps.appendChild(sec);
+    });
   }
 
   function toggle(it, label, on){
     var next = copyChecked(state.checked);      // niemals in place aendern
     if (on) next[it.id] = true; else delete next[it.id];
     state.checked = next;
+    lastEdit = Date.now();
+    label.classList.toggle('on', !!on);
+    updateCounts();
+    push();
+  }
+
+  function toggleStep(st, label, on){
+    var next = copyChecked(state.steps);
+    if (on) next[st.id] = true; else delete next[st.id];
+    state.steps = next;
     lastEdit = Date.now();
     label.classList.toggle('on', !!on);
     updateCounts();
@@ -430,6 +638,17 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     elPlus.disabled = n >= MAX;
     document.getElementById('v-route').setAttribute('aria-pressed', String(view === 'route'));
     document.getElementById('v-dish').setAttribute('aria-pressed', String(view === 'dish'));
+
+    var kochen = tab === 'kochen';
+    elTabE.setAttribute('aria-selected', String(!kochen));
+    elTabK.setAttribute('aria-selected', String(kochen));
+    elList.hidden = kochen;
+    elRecipe.hidden = !kochen;
+    elSort.hidden = kochen;
+    elMeal.value = state.mealTime;
+
+    renderPlan();
+    renderSteps();
 
     elList.textContent = '';
     tallies = [];
@@ -496,6 +715,16 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
   }
   elMinus.addEventListener('click', function(){ setServings(state.servings - 1); });
   elPlus .addEventListener('click', function(){ setServings(state.servings + 1); });
+  function setTab(t){ tab = t; saveLocal(); render(); window.scrollTo(0, 0); }
+  elTabE.addEventListener('click', function(){ setTab('einkauf'); });
+  elTabK.addEventListener('click', function(){ setTab('kochen'); });
+
+  elMeal.addEventListener('change', function(){
+    state.mealTime = elMeal.value || '18:00';
+    lastEdit = Date.now();
+    renderPlan(); push();
+  });
+
   document.getElementById('v-route').addEventListener('click', function(){ view = 'route'; saveLocal(); render(); });
   document.getElementById('v-dish') .addEventListener('click', function(){ view = 'dish';  saveLocal(); render(); });
 
@@ -511,7 +740,8 @@ button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
     }
     clearTimeout(armed); armed = null;
     elReset.classList.remove('armed'); elReset.textContent = 'Alles abwählen';
-    state.checked = {}; lastEdit = Date.now();
+    if (tab === 'kochen') state.steps = {}; else state.checked = {};
+    lastEdit = Date.now();
     push(); render();
   });
 
