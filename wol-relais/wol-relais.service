@@ -1,0 +1,33 @@
+[Unit]
+Description=WoL-Relais: weckt den PC per Magic Packet (Webseite und API)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/wol-relais.env
+ExecStart=/usr/bin/python3 /opt/wol-relais/wol_server.py serve
+Restart=on-failure
+RestartSec=5
+
+# Laeuft als kurzlebiger Benutzer ohne Login und ohne Schreibrechte.
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+# Einzige Sonderberechtigung: ping darf ICMP senden (fuer die An/Aus-Anzeige).
+CapabilityBoundingSet=CAP_NET_RAW
+AmbientCapabilities=CAP_NET_RAW
+
+[Install]
+WantedBy=multi-user.target
